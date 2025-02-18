@@ -1,0 +1,157 @@
+<%- include('partials/header') %>
+
+   <div class="t-container">
+    <!-- Back Button -->
+    <div style="margin-bottom: 1rem;">
+        <a href="/" class="t-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"></path>
+                <path d="M19 12H5"></path>
+            </svg>
+            Back to Orders
+        </a>
+    </div>
+
+    <!-- Order Title -->
+    <h1>Order #<span id="orderId"></span></h1>
+
+    <!-- Grid Layout for Order and Customer Information -->
+    <div class="t-grid t-grid-cols-2">
+        <!-- Order Information -->
+        <div class="t-card">
+            <div class="t-card-header">
+                <h2 class="t-card-title">Order Information</h2>
+            </div>
+            <div class="t-card-content">
+                <dl class="t-info-grid">
+                    <dt>Status:</dt>
+                    <dd>
+                        <span id="orderStatusBadge" class="t-status-badge">N/A</span>
+                    </dd>
+                    <dt>Order Date:</dt>
+                    <dd id="orderDate">N/A</dd>
+                    <dt>Total:</dt>
+                    <dd id="orderTotal">N/A</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="t-card">
+            <div class="t-card-header">
+                <h2 class="t-card-title">Customer Information</h2>
+            </div>
+            <div class="t-card-content">
+                <dl class="t-info-grid">
+                    <dt>Name:</dt>
+                    <dd id="customerName">N/A</dd>
+                    <dt>Email:</dt>
+                    <dd id="customerEmail">N/A</dd>
+                    <dt>Phone:</dt>
+                    <dd id="customerPhone">N/A</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="t-card t-mt-4">
+        <div class="t-card-header">
+            <h2 class="t-card-title">Order Items</h2>
+        </div>
+        <div class="t-card-content">
+            <table class="t-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="orderItemsBody">
+                    <!-- Dynamic order items will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Shipping Information -->
+    <div class="t-card t-mt-4">
+        <div class="t-card-header">
+            <h2 class="t-card-title">Shipping Information</h2>
+        </div>
+        <div class="t-card-content">
+            <div class="t-flex t-items-center t-space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                    <line x1="12" y1="22" x2="12" y2="12"></line>
+                </svg>
+                <div>
+                    <p id="shippingMethod" style="font-weight: 600;">N/A</p>
+                    <p id="estimatedDelivery" style="font-size: 0.875rem; color: #6b7280;">N/A</p>
+                </div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Shipping Address:</h4>
+                <p id="shippingAddress">N/A</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+ async function fetchUserOrder() {
+    try {
+        const response = await fetch('/api/tracking');
+        const data = await response.json();
+
+        if (response.ok) {
+            const order = data.order;
+            displayOrderDetails(order);
+        } else {
+            alert(data.message || 'Failed to fetch order details.');
+        }
+    } catch (error) {
+        console.error('Error fetching user order:', error);
+        alert('An error occurred while fetching order details.');
+    }
+}
+function displayOrderDetails(order) {
+    document.getElementById('orderId').textContent = order.order_id;
+    document.getElementById('orderStatusBadge').textContent = order.order_status;
+    document.getElementById('orderStatusBadge').className = `t-status-badge badge-${order.order_status}`;
+    document.getElementById('orderDate').textContent = new Date(order.order_date).toLocaleDateString();
+    document.getElementById('orderTotal').textContent = `$${parseFloat(order.total_amount).toFixed(2)}`;
+    document.getElementById('customerName').textContent = order.customer_name;
+    document.getElementById('customerPhone').textContent = order.phone_number || 'N/A';
+    document.getElementById('shippingAddress').textContent = order.delivery_address || 'N/A';
+
+    const items = order.items.split('; ').map(item => {
+        const [productInfo, priceInfo, totalInfo] = item.split(', ');
+        const product = productInfo.match(/^(.*) \((\d+)\)$/).slice(1);
+        const price = parseFloat(priceInfo.replace('Price: ', ''));
+        const total = parseFloat(totalInfo.replace('Total: ', ''));
+        return { product: product[0], quantity: parseInt(product[1]), price, total };
+    });
+
+    const tbody = document.getElementById('orderItemsBody');
+    tbody.innerHTML = items.map(item => `
+        <tr>
+            <td>${item.product}</td>
+            <td>${item.quantity}</td>
+            <td>$${item.price.toFixed(2)}</td>
+            <td>$${item.total.toFixed(2)}</td>
+        </tr>
+    `).join('');
+}
+
+
+
+document.addEventListener('DOMContentLoaded', fetchUserOrder);
+
+    </script>
+
+<%- include('partials/footer') %>

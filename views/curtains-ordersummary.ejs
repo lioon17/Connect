@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Summary</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+    .form-radio {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  border: 2px solid #4a5568;
+  border-radius: 50%;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-radio:checked {
+  background-color: #4299e1;
+  border-color: #4299e1;
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+.form-radio:focus {
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 py-12">
+    <div class="w-full max-w-4xl mx-auto p-4 space-y-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold mb-4">Order Summary</h2>
+            <ul id="order-items" class="space-y-4 mb-6"></ul>
+            <hr class="my-6">
+            <div class="space-y-2 mb-6">
+                <div class="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span id="subtotal" class="font-semibold"></span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span>Shipping</span>
+                    <span id="shipping" class="font-semibold"></span>
+                </div>
+            </div>
+            <hr class="my-6">
+            <div class="flex justify-between text-lg font-bold">
+                <span>Total</span>
+                <span id="total"></span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold mb-4">Payment Method</h2>
+            <div class="space-y-4">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="radio" name="payment" value="mpesa" checked class="form-radio">
+                    <span class="flex items-center justify-between flex-1">
+                        <span>Mpesa</span>
+                        <img src="/images/Mpesa-Logo.png" alt="Mpesa" class="h-10">
+                    </span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="radio" name="payment" value="cash" class="form-radio">
+                    <span>Cash on Delivery</span>
+                </label>
+            </div>
+            <div id="mpesa-input" class="mt-4">
+                <label for="mpesa-phone" class="block mb-2">Enter Mpesa Number:</label>
+                <input type="tel" id="mpesa-phone" placeholder="07XXXXXXXX" pattern="[0-9]{10}" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <button id="place-order-btn" class="w-full bg-blue-600 text-white text-lg py-4 px-4 rounded-md hover:bg-blue-700 transition duration-300 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                </svg>
+                Place Order
+            </button>
+            <p class="text-sm text-gray-500 flex items-center justify-center mt-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z" />
+                    <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
+                </svg>
+                Free shipping on all orders over $100
+            </p>
+        </div>
+    </div>
+    <script  >document.addEventListener('DOMContentLoaded', async () => {
+        const orderItemsEl = document.getElementById('order-items');
+        const subtotalEl = document.getElementById('subtotal');
+        const shippingEl = document.getElementById('shipping');
+        const totalEl = document.getElementById('total');
+        const mpesaInputEl = document.getElementById('mpesa-input');
+        const placeOrderBtn = document.getElementById('place-order-btn');
+    
+        // Helper function to adjust the amount
+        function adjustAmount(amount) {
+            const wholePart = Math.floor(amount);
+            const fractionPart = amount - wholePart;
+            return fractionPart >= 0.50 ? wholePart + 1 : wholePart;
+        }
+    
+        // Helper function to extract `order_id` from the URL
+        function getOrderIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('order_id'); // Assumes the URL has ?order_id=8
+        }
+    
+        // Function to fetch order details by order_id
+        async function fetchOrderDetails(orderId) {
+            try {
+                const response = await fetch(`/orders/${orderId}`);
+                if (!response.ok) throw new Error('Failed to fetch order details.');
+    
+                const order = await response.json();
+                if (!order) throw new Error('Order not found.');
+    
+                return order;
+            } catch (error) {
+                console.error('Error fetching order details:', error);
+                alert('Error loading the order details. Please try again.');
+            }
+        }
+    
+        // Function to render order items
+        function renderOrderItems(windows) {
+            orderItemsEl.innerHTML = windows.map(window => `
+              <li class="flex justify-between items-center">
+                    <span class="font-medium">
+                        Window ${window.window_number}:
+                    </span>
+                    <span class="font-medium">
+                        ${window.width}m x ${window.height}m
+                    </span>
+                </li>
+            `).join('');
+        }
+    
+        // Function to update totals
+        function updateTotals(order, shippingCost = 0) {
+            const subtotal = parseFloat(order.total_price);
+            const total = subtotal + shippingCost;
+    
+            subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+            shippingEl.textContent = `$${shippingCost.toFixed(2)}`;
+            totalEl.textContent = `$${total.toFixed(2)}`;
+        }
+    
+        // Function to handle payment method changes
+        function handlePaymentMethodChange() {
+            const selectedPayment = document.querySelector('input[name="payment"]:checked')?.value;
+            mpesaInputEl.style.display = selectedPayment === 'mpesa' ? 'block' : 'none';
+        }
+    
+        // Fetch and render order details on page load
+        const orderId = getOrderIdFromUrl(); // Dynamically fetch the order_id from the URL
+    
+        if (!orderId) {
+            alert('Order ID is missing from the URL.');
+            return;
+        }
+    
+        const orderDetails = await fetchOrderDetails(orderId);
+    
+        if (orderDetails) {
+            renderOrderItems(orderDetails.windows);
+            updateTotals(orderDetails);
+    
+            // Attach event listeners for payment method changes
+            document.querySelectorAll('input[name="payment"]').forEach(radio => {
+                radio.addEventListener('change', handlePaymentMethodChange);
+            });
+    
+            // Handle place order button click
+            placeOrderBtn.addEventListener('click', async () => {
+                const selectedPayment = document.querySelector('input[name="payment"]:checked')?.value;
+                const mpesaNumber = document.getElementById('mpesa-phone').value.trim();
+    
+                // Validate payment method
+                if (!selectedPayment) {
+                    alert('Please select a payment method.');
+                    return;
+                }
+    
+                // Validate Mpesa number for Mpesa payment method
+                if (selectedPayment === 'mpesa' && (!mpesaNumber || !/^[0-9]{10}$/.test(mpesaNumber))) {
+                    alert('Please enter a valid Mpesa number.');
+                    return;
+                }
+    
+                try {
+                    // Step 1: Register Callback URL
+                    const registerResponse = await fetch('/registerurl');
+                    if (!registerResponse.ok) {
+                        console.error('Error registering callback URL:', await registerResponse.text());
+                        alert('Failed to register callback URL.');
+                        return;
+                    }
+    
+                    // Step 2: Trigger STK Push if Mpesa is selected
+                    if (selectedPayment === 'mpesa') {
+                        const totalAmount = parseFloat(totalEl.textContent.replace('$', ''));
+                        const adjustedAmount = adjustAmount(totalAmount); // Adjust the amount for Mpesa
+    
+                        const stkResponse = await fetch('/stkpush', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                phoneNumber: mpesaNumber,
+                                amount: adjustedAmount, // Use adjusted amount
+                                orderId: orderDetails.order_id, // Include order ID for tracking
+                            }),
+                        });
+    
+                        if (!stkResponse.ok) {
+                            console.error('Error triggering STK Push:', await stkResponse.text());
+                            alert('Failed to send STK push.');
+                            return;
+                        }
+    
+                        const stkResult = await stkResponse.json();
+                        const { CheckoutRequestID } = stkResult.response;
+                        console.log('STK Push sent successfully. CheckoutRequestID:', CheckoutRequestID);
+    
+                        // Step 3: Update the Order with the CheckoutRequestID
+                        const updateOrderResponse = await fetch(`/orders/${orderDetails.order_id}/update-checkout-id`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ CheckoutRequestID }),
+                        });
+    
+                        if (!updateOrderResponse.ok) {
+                            const updateError = await updateOrderResponse.json();
+                            console.error('Error updating order:', updateError);
+                            alert(`Failed to update order: ${updateError.message}`);
+                            return;
+                        }
+    
+                        window.location.href = `/complete-purchase?order_id=${orderDetails.order_id}`;
+                    } else {
+                        alert('Order will be processed with cash on delivery.');
+                    }
+                } catch (error) {
+                    console.error('Error during payment process:', error);
+                    alert('An error occurred during the payment process. Please try again.');
+                }
+            });
+    
+            // Initialize the payment method display
+            handlePaymentMethodChange();
+        }
+    });
+    
+
+</script>
+</body>
+</html>
+

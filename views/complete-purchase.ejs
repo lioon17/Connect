@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curtains Order Summary</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto py-12 px-4">
+        <main class="max-w-3xl mx-auto">
+            <div class="bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <!-- Success Icon -->
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Order Complete Heading -->
+                    <h1 class="text-center text-3xl font-extrabold text-gray-900 mb-4">Order Complete</h1>
+                    <p class="text-center text-lg text-gray-500 mb-8">Thank you for your purchase!</p>
+
+                    <!-- Order Summary Section -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
+                        <div id="order-summary" class="space-y-4">
+                            <!-- Order summary details will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Delivery Information Section -->
+                    <div class="mt-8">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Delivery Information</h2>
+                        <p class="text-gray-600">Your order will be delivered to:</p>
+                        <p class="font-medium mt-2" id="delivery-address">
+                            <!-- Delivery address will be dynamically inserted here -->
+                        </p>
+                    </div>
+
+                    <!-- Order Items Section -->
+                    <div class="mt-8">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Items</h2>
+                        <table class="min-w-full bg-white border rounded-md">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Window</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Dimensions</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Price per m²</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-items" class="divide-y divide-gray-200">
+                                <!-- Order items will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Continue Shopping Button -->
+                    <div class="mt-8 flex justify-center">
+                        <a href="/" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const orderSummaryEl = document.getElementById('order-summary');
+            const deliveryAddressEl = document.getElementById('delivery-address');
+            const orderItemsEl = document.getElementById('order-items');
+
+            // Fetch the latest paid order details
+            async function fetchPaidOrder(orderId) {
+                try {
+                    const response = await fetch(`/orders/${orderId}`);
+                    if (!response.ok) throw new Error('Failed to fetch order details.');
+
+                    const order = await response.json();
+                    if (!order) throw new Error('Order not found.');
+
+                    return order;
+                } catch (error) {
+                    console.error('Error fetching order details:', error);
+                    alert('Error loading order details. Please try again.');
+                }
+            }
+
+            // Function to render order summary
+            function renderOrderSummary(order) {
+                orderSummaryEl.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order number:</span>
+                        <span class="font-medium">#${order.order_id}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total amount:</span>
+                        <span class="font-medium">KES ${parseFloat(order.total_price).toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Payment method:</span>
+                        <span class="font-medium">${order.payment_method || 'Mpesa'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order status:</span>
+                        <span class="font-medium">${order.payment_status}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order date:</span>
+                        <span class="font-medium">${new Date(order.created_at).toLocaleString()}</span>
+                    </div>
+                `;
+            }
+
+            // Function to render delivery address
+            function renderDeliveryAddress(order) {
+                deliveryAddressEl.textContent = order.delivery_option === 'delivery'
+                    ? order.delivery_location || 'N/A'
+                    : `Pickup Point: ${order.pickup_point}`;
+            }
+
+            // Function to render order items
+            function renderOrderItems(windows) {
+                orderItemsEl.innerHTML = windows.map(window => `
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900">Window ${window.window_number}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${window.width}m x ${window.height}m</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">KES 20</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">KES ${(window.width * window.height * 20).toFixed(2)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Get the order ID from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id');
+
+            if (orderId) {
+                const order = await fetchPaidOrder(orderId);
+
+                if (order) {
+                    renderOrderSummary(order);
+                    renderDeliveryAddress(order);
+                    renderOrderItems(order.windows);
+                }
+            } else {
+                alert('Order ID not found in the URL.');
+            }
+        });
+    </script>
+</body>
+
+</html>

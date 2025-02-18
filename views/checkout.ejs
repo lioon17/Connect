@@ -1,0 +1,522 @@
+
+<%- include('partials/header') %>
+ 
+    <div class="checkout-container">
+        <header class="cart-header">
+            <h1 class="cart-title">Shopping Cart</h1>
+            <div class="progress-indicator">
+                <div class="progress-step active" data-step="1">
+                    <span class="progress-number">1</span>
+                    <span class="step-label">Shopping Cart</span>
+                </div>
+                <span class="progress-arrow">→</span>
+                <div class="progress-step" data-step="2">
+                    <span class="progress-number inactive">2</span>
+                    <span class="step-label">Checkout Details</span>
+                </div>
+                <span class="progress-arrow">→</span>
+                <div class="progress-step" data-step="3">
+                    <span class="progress-number inactive">3</span>
+                    <span class="step-label">Order Complete</span>
+                </div>
+            </div>
+        </header>
+        
+        
+
+        <div class="steps-container">
+            <div class="step-content" id="step-1">
+                <div class="h-cart-layout">
+                    <!-- Cart Items Section -->
+                    <div class="h-cart-items">
+                        <table class="h-cart-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="cart-items">
+                                <!-- Cart items will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+        
+                        <div style="margin-top: 2rem;">
+                            <button class="h-btn btn-outline">
+                                <a href="/product">Continue shopping</a>
+                            </button>
+                        </div>
+                    </div>
+        
+                    <!-- Cart Sidebar Section -->
+                    <div class="cart-sidebar">
+                        <div class="cart-totals">
+                            <h2>Cart total</h2>
+                         
+                            <div class="total-row final">
+                                <span class="total-title">Total</span>
+                                <span id="cart-total">Ksh0.00</span>
+                            </div>
+                            <button class="h-btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="proceedToCheckout()">
+                                Proceed to checkout
+                            </button>
+                        </div>
+        
+                        <!-- Recommended Products Section -->
+                        <div class="recommended-products">
+                            <h2>You may be interested in ...</h2>
+                            <div class="h-product-grid">
+                                <div class="h-product-card">
+                                    <img src="images/IMG-20241221-WA0005.jpg" alt="Flash Spray Wipe Done">
+                                    <h3>Flash Spray Wipe Done</h3>
+                                    <p>$35</p>
+                                    <span class="h-product-category">Supermarket</span>
+                                </div>
+                                <div class="h-product-card">
+                                    <img src="images/IMG-20241221-WA0006.jpg" alt="Ocado Cowboy Steak">
+                                    <h3>Ocado Cowboy Steak</h3>
+                                    <p>$18</p>
+                                    <span class="h-product-category">Supermarket</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="step-content" id="step-2" style="display: none;">
+                <h1 class="text-3xl font-bold mb-6">Checkout</h1>
+                <div class="grid md:grid-cols-2">
+                    <div class="h-card">
+                        <div class="h-card-header">
+                            <h2 class="h-card-title">Your Order</h2>
+                            <p class="h-card-description">Review your items before placing the order</p>
+                        </div>
+                        <div class="h-card-content">
+                            <table class="h-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-right">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="h-table-body">
+                                    <!-- Cart items will be dynamically injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+            <div class="space-y-6">
+                <div class="h-card">
+                    <div class="h-card-header">
+                        <h2 class="h-card-title">Delivery Information</h2>
+                    </div>
+                    <div class="h-card-content">
+                        <form method="POST">
+                            <div class="h-form-group">
+                                <label for="location" class="form-label">Delivery Location</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                    </span>
+                                    <input type="text" id="location" class="form-input" placeholder="Enter your delivery address">
+                                </div>
+                            </div>
+                            <div class="h-form-group">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                    </span>
+                                    <input type="tel" id="phone" class="form-input" placeholder="Enter your phone number">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="h-card">
+                    <div class="h-card-header">
+                        <h2 class="h-card-title">Payment Method</h2>
+                    </div>
+                    <div class="h-card-content">
+                        <form class="radio-group" method="POST">
+                            <label class="radio-item">
+                                <input type="radio" name="payment" value="mpesa" class="radio-input">
+                                Mpesa
+                                <!-- Mpesa logo container placed on the right of the radio button -->
+                                <div class="mpesa-logo-container">
+                                    <img src="/images/Mpesa-Logo.png" alt="Mpesa" class="mpesa-logo">
+                                </div>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="payment" value="cash" class="radio-input">
+                                Cash on Delivery
+                            </label>
+                        </form>
+                        <!-- Placeholder for the phone number input -->
+                        <div id="mpesa-phone-input" style="display: none; margin-top: 1rem;">
+                            <label for="mpesa-phone">Enter Mpesa Number:</label>
+                            <input type="tel" id="mpesa-phone" name="mpesa_phone" placeholder="07XXXXXXXX" pattern="[0-9]{10}" required>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="h-card">
+                    <div class="h-card-content">
+                        <button class="h-btn btn-lg w-full" id="place-order-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                            Place Order
+                        </button>
+                    </div>
+                    <div class="h-card-footer">
+                        <p class="text-sm text-gray-500 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                                <rect x="1" y="3" width="15" height="13"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                            </svg>
+                            Free shipping on all orders over $100
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+
+    <div class="step-content" id="step-3" style="display: none;">
+        <main class="max-w-3xl mx-auto">
+            <div class="bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <!-- Success Icon -->
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                            <svg class="check-icon text-green-600" viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+    
+                    <!-- Order Complete Heading -->
+                    <h1 class="text-center text-3xl font-extrabold text-gray-900 mb-4">Order Complete</h1>
+                    <p class="text-center text-lg text-gray-500 mb-8">Thank you for your purchase!</p>
+    
+                    <!-- Order Summary Section -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
+                        <div id="order-summary" class="space-y-4">
+                            <!-- Order summary details will be dynamically inserted here -->
+                        </div>
+                    </div>
+    
+                    <!-- Delivery Information Section -->
+                    <div class="mt-8">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Delivery Information</h2>
+                        <p class="text-gray-600">Your order will be delivered to:</p>
+                        <p class="font-medium mt-2" id="delivery-address">
+                            <!-- Delivery address will be dynamically inserted here -->
+                        </p>
+                    </div>
+    
+                    <!-- Order Items Section -->
+                    <div class="mt-8">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Items</h2>
+                        <table class="min-w-full bg-white border rounded-md">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Product</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Price</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-items" class="divide-y divide-gray-200">
+                                <!-- Order items will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+    
+                    <!-- Continue Shopping Button -->
+                    <div class="mt-8 flex justify-center">
+                        <a href="/" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+
+    
+
+
+    </div>
+
+    <div class="h-buttons">
+        <button class="button-13" id="prev-step" style="display: none;" role="button">Previous</button>
+        <button class="button-13" id="next-step" role="button">Next</button>
+    </div>
+    
+    </div>
+    <script src="/script.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const steps = document.querySelectorAll(".progress-step");
+    const contents = document.querySelectorAll(".step-content");
+    const nextBtn = document.getElementById("next-step");
+    const prevBtn = document.getElementById("prev-step");
+    const radioButtons = document.querySelectorAll('.radio-input');
+    const phoneInputDiv = document.getElementById('mpesa-phone-input');
+    let currentStep = 1;
+    let orderPlaced = false; // Track if the order has been placed
+
+    // ✅ Function to update the steps
+    function updateStep() {
+        steps.forEach((step, index) => {
+            const stepNumber = step.querySelector(".progress-number");
+
+            if (index + 1 === currentStep) {
+                step.classList.add("active");
+                stepNumber.classList.remove("inactive");
+            } else {
+                step.classList.remove("active");
+                stepNumber.classList.add("inactive");
+            }
+        });
+
+        contents.forEach((content, index) => {
+            content.style.display = index + 1 === currentStep ? "block" : "none";
+        });
+
+        prevBtn.style.display = currentStep === 1 ? "none" : "block";
+        nextBtn.style.display = currentStep === 3 && !orderPlaced ? "none" : "block"; // Hide Next button if order is not placed
+        nextBtn.textContent = currentStep === steps.length ? "Finish" : "Next";
+    }
+
+    // ✅ Proceed to Checkout function
+    function proceedToCheckout() {
+        currentStep = 2; // Go to step 2
+        updateStep();
+
+        const progressIndicator = document.querySelector('.checkout-progress');
+        if (progressIndicator) {
+            progressIndicator.textContent = 'Step 2: Delivery Information';
+        }
+
+        console.log('Proceeded to checkout step 2');
+    }
+
+    // ✅ Next Button Event Listener
+    nextBtn.addEventListener("click", () => {
+        if (currentStep === 2 && !orderPlaced) {
+            alert("Please place your order first.");
+            return;
+        }
+
+        if (currentStep < steps.length) {
+            currentStep++;
+            updateStep();
+
+            if (currentStep === 3) {
+                renderOrderSummary('#order-summary'); // Load order summary when reaching Step 3
+            }
+        }
+    });
+
+    // ✅ Previous Button Event Listener
+    prevBtn.addEventListener("click", () => {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStep();
+        }
+    });
+
+    document.getElementById('place-order-btn').addEventListener('click', async () => {
+    const phoneNumber = document.getElementById('phone').value.trim();
+    const deliveryLocation = document.getElementById('location').value.trim();
+    const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value;
+
+    // Fetch cart items
+    const cartResponse = await fetch('/cart');
+    const cartData = await cartResponse.json();
+
+    if (!cartData.success) {
+        alert('Failed to load cart items. Please try again.');
+        return;
+    }
+
+    const cart = cartData.cart;
+
+    if (!phoneNumber || !deliveryLocation || !paymentMethod || cart.length === 0) {
+        alert('Please fill in all required fields and ensure your cart is not empty.');
+        return;
+    }
+
+    try {
+        // Step 1: Register Callback URL
+        const registerResponse = await fetch('/registerurl');
+        if (!registerResponse.ok) {
+            console.error('Error registering callback URL:', await registerResponse.text());
+            alert('Failed to register callback URL.');
+            return;
+        }
+        const registerResult = await registerResponse.json();
+        console.log('Callback URL registered successfully:', registerResult);
+
+        // Step 2: Trigger STK Push
+        const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const stkResponse = await fetch('/stkpush', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber, amount: totalAmount }),
+        });
+
+        if (!stkResponse.ok) {
+            const stkError = await stkResponse.json();
+
+            // Check for specific error related to invalid phone number
+            if (stkError.message && stkError.message.includes('Invalid phone number')) {
+                alert('The phone number format is invalid. Please use "254xxxxxxxxx" or "07xxxxxxxx".');
+            } else {
+                alert('Failed to send STK push. Please try again.');
+            }
+
+            console.error('Error triggering STK Push:', stkError);
+            return;
+        }
+        const stkResult = await stkResponse.json();
+        const { CheckoutRequestID } = stkResult.response;
+        console.log('STK Push sent successfully. CheckoutRequestID:', CheckoutRequestID);
+
+        // Step 3: Place the Order
+        const orderResponse = await fetch('/placeOrder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cart,
+                phoneNumber,
+                deliveryAddress: deliveryLocation,
+                paymentMethod,
+                CheckoutRequestID, // Include CheckoutRequestID for payment tracking
+            }),
+        });
+
+        if (!orderResponse.ok) {
+            const orderError = await orderResponse.json();
+            console.error('Error placing order:', orderError);
+            alert(`Failed to place order: ${orderError.message}`);
+            return;
+        }
+
+        const orderResult = await orderResponse.json();
+        alert('Order placed successfully!');
+        console.log('Order placed successfully:', orderResult);
+
+        // Proceed to the next step or update the UI
+        orderPlaced = true;
+        currentStep = 3; // Navigate to Step 3
+        updateStep();
+        renderOrderSummary('#order-summary'); // Load the order summary
+    } catch (error) {
+        console.error('Error during order process:', error);
+        alert('An error occurred while placing your order. Please try again.');
+    }
+});
+
+
+    // ✅ Radio button change event
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.value === 'mpesa') {
+                phoneInputDiv.style.display = 'block'; // Show phone input
+            } else {
+                phoneInputDiv.style.display = 'none'; // Hide phone input
+            }
+        });
+    });
+
+    // ✅ Add proceedToCheckout function to global scope
+    window.proceedToCheckout = proceedToCheckout;
+
+    // ✅ Initialize the steps
+    updateStep();
+});
+
+
+async function renderOrderSummary(containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) {
+        console.error(`Container not found: ${containerSelector}`);
+        return;
+    }
+
+    try {
+        // Fetch order summary from the server
+        const response = await fetch('/orderSummary');
+        const data = await response.json();
+
+        // Clear the container
+        container.innerHTML = '';
+
+        if (!data.success) {
+            container.innerHTML = '<p class="text-red-500">Failed to load order summary.</p>';
+            return;
+        }
+
+        const { order } = data;
+
+        // Render Order Summary Details
+        container.innerHTML = `
+            <div class="flex justify-between">
+                <span class="text-gray-600">Order number:</span>
+                <span class="font-medium">#${order.order_number}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-600">Total amount:</span>
+                <span class="font-medium">KES ${parseFloat(order.total_amount).toFixed(2)}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-600">Payment method:</span>
+                <span class="font-medium">${order.payment_method}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-600">Order status:</span>
+                <span class="font-medium">${order.order_status}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-600">Order date:</span>
+                <span class="font-medium">${new Date(order.order_date).toLocaleString()}</span>
+            </div>
+        `;
+
+        // Render Order Items
+        const itemsContainer = document.querySelector('#order-items');
+        itemsContainer.innerHTML = '';
+        order.items.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 text-sm text-gray-900">${item.title}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${item.quantity}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">KES ${parseFloat(item.price).toFixed(2)}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">KES ${parseFloat(item.total).toFixed(2)}</td>
+            `;
+            itemsContainer.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error loading order summary:', error);
+        container.innerHTML = '<p class="text-red-500">An error occurred while loading order summary.</p>';
+    }
+}
+    </script>
+    <%- include('partials/footer') %>
+
+  

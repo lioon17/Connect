@@ -1,0 +1,145 @@
+<%- include('partials/header') %>
+
+<div class="index-container">
+    
+
+    <h1 class="ix">Our Products</h1>
+    <p class="subtitle">Explore our new and hot products with good promotions</p>
+
+    <div class="product-layout">
+        <!-- Sidebar Filters -->
+        <aside class="p-sidebar" id="filterSidebar">
+            <div class="sidebar-header">
+                <h3>Filters</h3>
+                <button class="floating-close-btn">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        
+            <div class="p-sidebar-content">
+                <div class="card">
+                    <div class="card-content">
+                        <input type="text" id="search" placeholder="Search products..." class="search-input">
+                    </div>
+                </div>
+        
+                <!-- Price Filter
+                <div class="card">
+                    <div class="card-content">
+                        <h3 class="filter-title">Filter by price</h3>
+                        <div id="price-slider"></div>
+                        <div class="price-range">
+                            <span id="price-min">$680</span>
+                            <span id="price-max">$1580</span>
+                        </div>
+                    </div>
+                </div>  -->
+        
+                <!-- Categories -->
+                <div class="card">
+                    <div class="card-content">
+                        <div class="accordion" id="categories-accordion">
+                            <!-- Categories will be inserted here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        
+        <!-- Toggle Button -->
+        <button id="toggle-sidebar" class="toggle-sidebar">
+            <i class="bi bi-funnel"></i>Filter
+        </button>
+        
+
+        <!-- Main Content -->
+        <main class="main-content">
+               <!-- Search Results Section -->
+   
+
+            <div class="toolbar">
+                <div class="view-controls">
+                 <!-- Toolbar   <button class="btn-icon active" data-view="grid">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </button>
+                    <button class="btn-icon" data-view="list">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <span class="products-count">Showing 0 of 0 products</span>
+                    --> 
+                </div>
+               <!-- <select id="sort-select" class="sort-select">
+                    <option value="popular">Most Popular</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                </select> -->
+            </div>
+ 
+            <div class="search-results" id="search-results" style="display: none;">
+                <h2>Search Results</h2>
+                <div class="search-grid" id="search-grid">
+                    <!-- Searched items will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div class="product-grid" id="product-grid">
+                <!-- Products will be rendered here -->
+                
+            </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be inserted here by JavaScript -->
+        </div>
+ 
+
+        <div id="quick-view-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modal-title"></h2>
+                <img id="modal-image" src="" alt="Product Image" class="modal-image">
+                <p id="modal-description"></p>
+                <p id="modal-price" class="modal-price"></p>
+                <span id="modal-stock" class="stock-badge"></span>
+                <button id="modal-add-to-cart" class="add-to-cart">
+                    <i class="bi bi-cart-plus"></i> Add to cart
+                </button>
+            </div>
+        </div>
+
+
+        <div id="new-popup" class="new-popup">
+            <div class="new-popup-content">
+                <div class="new-popup-header">
+                    <img id="itemImage" src="" alt="Item Image" class="new-popup-item-image">
+                    <div class="item-details">
+                        <p id="itemName" class="new-popup-item-name"></p>
+                        <p id="actionText" class="new-popup-action-text"></p>
+                    </div>
+                    <button onclick="closePopup()" class="new-popup-close-button">
+                        <span class="sr-only"></span>
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <div id="new-popup-footer" class="new-popup-footer">
+                    <i id="popupIcon" class="bi bi-cart3"></i>
+                    <span id="popupMessage"></span>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+</div>
+</div>
+<script src="/script.js"></script>
+ 
+<%- include('partials/footer') %>

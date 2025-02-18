@@ -1,0 +1,447 @@
+<%- include('partials/header') %>
+<div class="container">
+    <div class="p-product-detail">
+        <div class="p-product-images">
+            <div class="p-card">
+                <img src="<%= images.find(img => img.image_type === 'front')?.image_url || '/images/default.jpg' %>" 
+                     alt="<%= product.title %>" class="p-main-image" id="mainImage">
+
+                <div class="thumbnail-container">
+                    <% images.forEach(image => { %>
+                        <img src="<%= image.image_url %>" 
+                             alt="<%= image.image_type %>" 
+                             class="thumbnail <%= image.image_type === 'front' ? 'active' : '' %>" 
+                             onmouseover="displayImage(this)">
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-product-info">
+            <nav>
+                <ul>
+                    <li class="pinfo-links"><a href="/">Home</a></li>
+                    <li class="pinfo-links"><a href="/product">Products</a></li>
+                </ul>
+            </nav>
+            <h1 class="p-h"><%= product.title %></h1>
+            <div class="p-rating">
+                <span class="p-star">★★★★</span>
+                <span class="p-star">☆</span>
+                <span>(1 customer review)</span>
+            </div>
+            <p><%= product.description %></p>
+            <p class="p-price"><%= product.price %> Ksh</p>
+
+           <!-- <div class="p-quantity-selector">
+                <button onclick="decrementQuantity()">-</button>
+                <span id="quantity">1</span>
+                <button onclick="incrementQuantity()">+</button>
+            </div>-->
+            <div>
+                <!-- Add data-product-id to buttons for wishlist and cart -->
+                <button class="p-button-a add-to-cart-btn" data-product-id="<%= product.id %>">Add to cart</button>
+                <button class="p-button p-button-outline add-to-wishlist-btn" data-product-id="<%= product.id %>">
+                    <i class="bi bi-heart-fill"></i> Wishlist
+                </button>
+                <button class="p-button p-button-outline share-button">
+                    <i class="bi bi-share"></i> Share
+                </button>
+                
+            </div>
+             
+            <div class="p-card">
+                <table>
+                  
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            <% if (product.stock_status === 'in_stock') { %>
+                                <span class="p-stock-status in-stock">In Stock</span>
+                            <% } else { %>
+                                <span class="p-stock-status out-of-stock">Out of Stock</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                   <!-- add tags eg Nike 
+                      <tr>
+                        <td><strong>Brand:</strong></td>
+                        <td>XTRA</td>
+                    </tr>
+
+                   <tr>
+                       <td><strong>Tags:</strong></td>
+                        <td>
+                            <span class="p-badge">Nike</span>
+                        </td>
+                    </tr>-->
+                    <tr>
+                        <td><strong>Category:</strong></td>
+                        <td><%= product.category %></td>
+                    </tr>
+                    
+                </table>
+            </div>
+            
+            <ul>
+                <li>Free shipping on all orders over $100</li>
+                <li>14 days easy refund & returns</li>
+                <li>Product taxes and customs duties included</li>
+            </ul>
+            <div>
+                <button class="p-button p-button-outline">Instagram</button>
+                <button class="p-button p-button-outline">Facebook</button>
+                <button class="p-button p-button-outline">Tiktok</button>
+                <button class="p-button p-button-outline">X</button>
+            </div>
+
+        </div>
+    </div>
+    
+    </div>
+    <script src="/script.js"></script> 
+<script>
+    // JavaScript to change the main image on thumbnail hover
+    function displayImage(thumbnail) {
+        const mainImage = document.getElementById('mainImage');
+        mainImage.src = thumbnail.src;
+
+        // Update active thumbnail class
+        document.querySelectorAll('.thumbnail').forEach(img => img.classList.remove('active'));
+        thumbnail.classList.add('active');
+    }
+
+
+    // Add to Wishlist Function
+async function addToWishlist(productId) {
+    try {
+        const response = await fetch('/wishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productId }),
+        });
+
+        if (response.status === 401) {
+            alert('You need to log in to add items to your wishlist.');
+            window.location.href = '/login';
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('Product added to wishlist!');
+            loadWishlistCount(); // Optional: Update wishlist count if you have a badge
+        } else {
+            alert(data.message || 'Failed to add product to wishlist.');
+        }
+    } catch (error) {
+        console.error('Error adding product to wishlist:', error);
+        alert('Something went wrong. Please try again.');
+    }
+}
+
+// Add to Cart Function
+async function addToCart(productId, quantity) {
+    try {
+        const response = await fetch('/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productId, quantity }),
+        });
+
+        if (response.status === 401) {
+            alert('You need to log in to add items to your cart.');
+            window.location.href = '/login';
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('Product added to cart!');
+            // Optional: Update cart count
+        } else {
+            alert(data.message || 'Failed to add product to cart.');
+        }
+    } catch (error) {
+        console.error('Error adding product to cart:', error);
+        alert('Something went wrong. Please try again.');
+    }
+}
+
+// Attach event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Add to Wishlist
+    document.querySelector('.add-to-wishlist-btn').addEventListener('click', (event) => {
+        const productId = event.target.dataset.productId;
+        addToWishlist(productId);
+    });
+
+    // Add to Cart
+    document.querySelector('.add-to-cart-btn').addEventListener('click', (event) => {
+        const productId = event.target.dataset.productId;
+        const quantity = parseInt(document.getElementById('quantity').textContent, 10);
+        addToCart(productId, quantity);
+    });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const shareButton = document.querySelector('.share-button');
+    
+    if (shareButton) {
+        shareButton.addEventListener('click', async () => {
+            const productTitle = '<%= product.title %>'; // Dynamically set product title
+            const productUrl = window.location.href; // Current product page URL
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: productTitle,
+                        text: `Check out this product: ${productTitle}`,
+                        url: productUrl,
+                    });
+                    console.log('Product shared successfully!');
+                } catch (error) {
+                    console.error('Error sharing product:', error);
+                }
+            } else {
+                // Fallback for browsers without Web Share API support
+                copyToClipboard(productUrl);
+                alert('Link copied to clipboard!');
+            }
+        });
+    }
+});
+
+// Helper function to copy the URL to clipboard
+function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+}
+
+
+</script>
+    <!--
+    <div class="p-product-detail">
+        <div class="p-product-images">
+            <div class="p-card">
+                <img src="images/IMG-20241221-WA0001.jpg" alt=",.." class="p-main-image" id="mainImage">
+                <div class="thumbnail-container">
+                    <img src="images/IMG-20241221-WA0001.jpg" alt="Aberdeen Angus Burgers - Image 1" class="thumbnail active" onclick="changeImage(this, 0)">
+                    <img src="images/IMG-20241221-WA0001.jpg" alt="Aberdeen Angus Burgers - Image 2" class="thumbnail" onclick="changeImage(this, 1)">
+                    <img src="images/IMG-20241221-WA0001.jpg" alt="Aberdeen Angus Burgers - Image 3" class="thumbnail" onclick="changeImage(this, 2)">
+                    <img src="images/IMG-20241221-WA0001.jpg" alt="Aberdeen Angus Burgers - Image 4" class="thumbnail" onclick="changeImage(this, 3)">
+                </div>
+            </div>
+        </div>
+        <div class="p-product-info">
+            <nav>
+                <ul>
+                    <li class="pinfo-links"><a href="#">Home</a>  </li>
+                    <li class="pinfo-links"><a href="#">Products</a>  </li>
+                  
+                </ul>
+            </nav>
+            <h1>Aberdeen Angus Burgers</h1>
+            <div class="p-rating">
+                <span class="p-star">★★★★</span>
+                <span class="p-star">☆</span>
+                <span>(1 customer review)</span>
+            </div>
+            <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+            <p class="p-price">20 Ksh</p>
+            <div class="p-quantity-selector">
+                <button onclick="decrementQuantity()">-</button>
+                <span id="quantity">1</span>
+                <button onclick="incrementQuantity()">+</button>
+            </div>
+            <div>
+                <button class="p-button">Add to cart</button>
+                <button class="p-button p-button-outline"><i class="bi bi-heart-fill"></i> Wishlist</button>
+                <button class="p-button p-button-outline"><i class="bi bi-share"></i></button>
+            </div>
+             
+            <div class="p-card">
+                <table>
+                    <tr>
+                        <td><strong>Brand:</strong></td>
+                        <td>XTRA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td class="p-stock">110 in stock</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tags:</strong></td>
+                        <td>
+                            <span class="p-badge">Angus</span>
+                            <span class="p-badge">Burgers</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Categories:</strong></td>
+                        <td>Supermarket</td>
+                    </tr>
+                </table>
+            </div>
+            <ul>
+                <li>Free shipping on all orders over $100</li>
+                <li>14 days easy refund & returns</li>
+                <li>Product taxes and customs duties included</li>
+            </ul>
+            <div>
+                <button class="p-button p-button-outline">Facebook</button>
+                <button class="p-button p-button-outline"> X</button>
+                <button class="p-button p-button-outline">YouTube</button>
+                <button class="p-button p-button-outline">Pinterest</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-tabs">
+        <ul class="p-tab-list">
+            <li class="active" onclick="changeTab(0)">Description</li>
+            <li onclick="changeTab(1)">Additional Information</li>
+            <li onclick="changeTab(2)">Reviews (3)</li>
+        </ul>
+        <div class="p-tab-content">
+            <div class="p-tab-pane active">
+                <h2>Product Description</h2>
+                <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+                <h3>Features</h3>
+                <ul>
+                    <li>100% Aberdeen Angus beef</li>
+                    <li>No artificial preservatives</li>
+                    <li>Perfect for grilling</li>
+                    <li>Individually wrapped for freshness</li>
+                </ul>
+            </div>
+            <div class="p-tab-pane">
+                <h2>Additional Information</h2>
+                <table>
+                    <tr>
+                        <td><strong>Weight:</strong></td>
+                        <td>4 x 113g (1/4 lb) burgers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimensions:</strong></td>
+                        <td>10 x 10 x 5 cm</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ingredients:</strong></td>
+                        <td>100% Aberdeen Angus Beef</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Allergens:</strong></td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage:</strong></td>
+                        <td>Keep refrigerated below 5°C</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="p-tab-pane">
+                <h2>Customer Reviews</h2>
+                <div class="p-card">
+                    <div class="p-rating">
+                        <span class="p-star">★★★★★</span>
+                    </div>
+                    <p><strong>John Doe</strong></p>
+                    <p>These burgers are amazing! Juicy and full of flavor.</p>
+                </div>
+                <div class="p-card">
+                    <div class="p-rating">
+                        <span class="p-star">★★★★</span>
+                        <span class="p-star">☆</span>
+                    </div>
+                    <p><strong>Jane Smith</strong></p>
+                    <p>Great quality, but a bit pricey.</p>
+                </div>
+                <div class="p-card">
+                    <div class="p-rating">
+                        <span class="p-star">★★★★★</span>
+                    </div>
+                    <p><strong>Mike Johnson</strong></p>
+                    <p>Best burgers I've ever had. Will definitely buy again!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-related-products">
+        <h2>Related Products</h2>
+        <div class="p-product-carousel">
+            <div class="p-card p-product-card">
+                <div class="p-image-container">
+                    <img src="images/IMG-20241221-WA0002.jpg" alt="Organic Beef Patties">
+                </div>
+                <h3>Organic Beef Patties</h3>
+                <p>$18</p>
+                <button class="p-button">Add to Cart</button>
+            </div>
+            <div class="p-card p-product-card">
+                <div class="p-image-container">
+                    <img src="images/IMG-20241221-WA0003.jpg" alt="Gourmet Burger Buns">
+                </div>
+                <h3>Gourmet Burger Buns</h3>
+                <p>$5</p>
+                <button class="p-button">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+    
+
+
+</div>
+
+<script>
+    // Image gallery
+    function changeImage(thumbnail, index) {
+        const mainImage = document.getElementById('mainImage');
+        mainImage.src = thumbnail.src;
+        document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+        thumbnail.classList.add('active');
+    }
+
+    // Quantity selector
+    let quantity = 1;
+    function incrementQuantity() {
+        quantity++;
+        updateQuantityDisplay();
+    }
+    function decrementQuantity() {
+        if (quantity > 1) {
+            quantity--;
+            updateQuantityDisplay();
+        }
+    }
+    function updateQuantityDisplay() {
+        document.getElementById('quantity').textContent = quantity;
+    }
+
+    // Tabs
+    function changeTab(tabIndex) {
+        const tabList = document.querySelectorAll('.tab-list li');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        tabList.forEach((tab, index) => {
+            if (index === tabIndex) {
+                tab.classList.add('active');
+                tabPanes[index].classList.add('active');
+            } else {
+                tab.classList.remove('active');
+                tabPanes[index].classList.remove('active');
+            }
+        });
+    }
+</script> -->
+
+<%- include('partials/footer') %>

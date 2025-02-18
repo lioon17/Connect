@@ -1,0 +1,88 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <h1>Wishlist</h1>
+    <p class="subtitle">Explore your saved products</p>
+    <div class="product-grid">
+        <% if (wishlist.length > 0) { %>
+            <% wishlist.forEach(product => { %>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="<%= product.image_url %>" alt="<%= product.title %>">
+                        <span class="price-tag">$<%= product.price %></span>
+                        <span class="quick-view" onclick="quickView(<%= product.product_id %>)">
+                            <i class="bi bi-eye"></i>
+                        </span>
+                    </div>
+                    <div class="product-info">
+                        <h2 class="product-title"><%= product.title %></h2>
+                        <span class="product-category"><%= product.category %></span>
+                    </div>
+                    <div class="product-actions">
+                        <button class="remove-from-wishlist" data-id="<%= product.wishlist_id %>">
+                            <i class="bi bi-trash"></i> Remove  
+                        </button>
+                        
+                        <% if (product.category.toLowerCase() === 'curtains') { %>
+                            <!-- Place Order button for curtains -->
+                            <button class="place-order-btn" onclick="redirectToCurtainsPage(<%= product.product_id %>)">
+                                <i class="bi bi-box-arrow-in-right"></i> Place Order
+                            </button>
+                        <% } else { %>
+                            <!-- Add to Cart button for other products -->
+                            <button class="add-to-cart" data-product-id="<%= product.product_id %>">
+                                <i class="bi bi-cart-plus"></i> Add to Cart
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p>No items in your wishlist.</p>
+        <% } %>
+    </div>
+ 
+
+
+
+    
+    <div id="quick-view-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title"></h2>
+            <img id="modal-image" src="" alt="Product Image" class="modal-image">
+            <p id="modal-description"></p>
+            <p id="modal-price" class="modal-price"></p>
+            <span id="modal-stock" class="stock-badge"></span>
+            <button id="modal-add-to-cart" class="add-to-cart">
+                <i class="bi bi-cart-plus"></i> Add to cart
+            </button>
+        </div>
+    </div>
+
+
+    <div id="new-popup" class="new-popup">
+        <div class="new-popup-content">
+            <div class="new-popup-header">
+                <img id="itemImage" src="" alt="Item Image" class="new-popup-item-image">
+                <div class="item-details">
+                    <p id="itemName" class="new-popup-item-name"></p>
+                    <p id="actionText" class="new-popup-action-text"></p>
+                </div>
+                <button onclick="closePopup()" class="new-popup-close-button">
+                    <span class="sr-only"></span>
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div id="new-popup-footer" class="new-popup-footer">
+                <i id="popupIcon" class="bi bi-cart3"></i>
+                <span id="popupMessage"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/script.js"></script>
+<script src="/wishlist.js"></script>
+
+<%- include('partials/footer') %>
