@@ -55,8 +55,8 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Username and password are required.' });
         }
 
-        // Find the user in the database
-        const [user] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+        // Fetch user from database (explicitly select user_id)
+        const [user] = await pool.query('SELECT user_id, username, role, password FROM users WHERE username = ?', [username]);
 
         if (user.length === 0) {
             return res.status(400).json({ error: 'Invalid username or password.' });
@@ -69,15 +69,22 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Invalid username or password.' });
         }
 
-        // Store user info in session, including role
+        // Store user ID in session (use user_id)
         req.session.user = {
-            id: user[0].id,
+            id: user[0].user_id,  // ✅ Correcting ID field
             username: user[0].username,
-            role: user[0].role // Store role in session
+            role: user[0].role
         };
 
-        // Return role to the frontend
-        res.status(200).json({ message: 'Login successful!', role: user[0].role });
+        // Save session and respond
+        req.session.save(err => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ error: 'Session save error' });
+            }
+            res.status(200).json({ message: 'Login successful!', user: req.session.user });
+        });
+
     } catch (err) {
         console.error('Login error:', err.message);
         res.status(500).json({ error: 'Internal Server Error' });
