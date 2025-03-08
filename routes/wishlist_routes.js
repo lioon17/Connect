@@ -95,4 +95,24 @@ router.get('/wishlist/count', isAuthenticated, async (req, res) => {
     }
 });
 
+
+router.get('/api/wishlist', isAuthenticated, async (req, res) => {
+    const userId = req.session.user_id;
+
+    try {
+        const [wishlistItems] = await pool.query(
+            `SELECT w.wishlist_id, w.product_id, p.title, p.category, p.price, pi.image_url
+             FROM wishlist w
+             JOIN products p ON w.product_id = p.id
+             LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.image_type = 'front'
+             WHERE w.user_id = ?`,
+            [userId]
+        );
+
+        res.json({ success: true, wishlist: wishlistItems });
+    } catch (error) {
+        console.error('Error fetching wishlist:', error);
+        res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+});
 module.exports = router;

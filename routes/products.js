@@ -178,6 +178,32 @@ router.get('/curtains', async (req, res) => {
         res.status(500).send('Error fetching curtain details');
     }
 });
+router.get('/api/product-sizes/:productId', async (req, res) => {
+    const productId = req.params.productId;
+
+    try {
+        // Ensure productId is a number to prevent SQL injection risks
+        if (isNaN(productId)) {
+            return res.status(400).json({ success: false, message: "Invalid product ID" });
+        }
+
+        // Query database for available sizes
+        const [sizes] = await db.query("SELECT size FROM product_sizes WHERE product_id = ?", [productId]);
+
+        // If no sizes found, return an empty array
+        if (sizes.length === 0) {
+            return res.json({ success: true, sizes: [] });
+        }
+
+        // Send the list of available sizes
+        res.json({ success: true, sizes: sizes.map(s => s.size) });
+
+    } catch (error) {
+        console.error("Error fetching sizes:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
 
 /*
 // Products route with search functionality

@@ -33,12 +33,18 @@
             <p><%= product.description %></p>
             <p class="p-price"><%= product.price %> Ksh</p>
 
-           <!-- <div class="p-quantity-selector">
+           <div class="p-quantity-selector">
                 <button onclick="decrementQuantity()">-</button>
                 <span id="quantity">1</span>
                 <button onclick="incrementQuantity()">+</button>
-            </div>-->
-            <div>
+            </div>
+            <div class="p-size-selector">
+                <p>Select Size:</p>
+                <div id="size-options">
+                    <!-- ✅ Sizes will be dynamically loaded here -->
+                </div>
+            </div>
+            <div class="btn-several">
                 <!-- Add data-product-id to buttons for wishlist and cart -->
                 <button class="p-button-a add-to-cart-btn" data-product-id="<%= product.id %>">Add to cart</button>
                 <button class="p-button p-button-outline add-to-wishlist-btn" data-product-id="<%= product.id %>">
@@ -98,6 +104,32 @@
         </div>
     </div>
     
+
+    <div id="popup" class="s-popup">
+        <div class="s-popup-overlay"></div>
+        <div class="s-popup-content">
+            <!-- Ensure the close button is a clickable div -->
+            <div class="s-close-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </div>
+    
+            <div class="s-popup-body">
+                <h2>Select Size</h2>
+                <p id="selected-size-display">No size selected</p> <!-- Show selected size here -->
+                <div id="size-options" class="size-options">
+                    <!-- Sizes will be dynamically loaded here -->
+                </div>
+            </div>
+    
+        <!--<div class="s-popup-footer">
+                <button id="gotItBtn" class="btn">Close</button>
+            </div> -->
+        </div>
+    </div>
+    
     </div>
     <script src="/script.js"></script> 
 <script>
@@ -141,13 +173,19 @@ async function addToWishlist(productId) {
     }
 }
 
-// Add to Cart Function
-async function addToCart(productId, quantity) {
+// ✅ Add to Cart Function (Includes size & quantity)
+async function addToCart(productId, quantity, size) {
     try {
+        // ✅ Validate that a size is selected
+        if (!size) {
+            alert('Please select a size before adding to cart.');
+            return;
+        }
+
         const response = await fetch('/cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ product_id: productId, quantity }),
+            body: JSON.stringify({ product_id: productId, quantity, size }),
         });
 
         if (response.status === 401) {
@@ -160,7 +198,7 @@ async function addToCart(productId, quantity) {
 
         if (data.success) {
             alert('Product added to cart!');
-            // Optional: Update cart count
+            // Optional: Update cart count dynamically
         } else {
             alert(data.message || 'Failed to add product to cart.');
         }
@@ -170,22 +208,54 @@ async function addToCart(productId, quantity) {
     }
 }
 
-// Attach event listeners
+// ✅ Quantity Control Functions
+function incrementQuantity() {
+    const quantityElement = document.getElementById('quantity');
+    if (quantityElement) {
+        let quantity = parseInt(quantityElement.textContent, 10);
+        quantityElement.textContent = quantity + 1;
+    }
+}
+
+function decrementQuantity() {
+    const quantityElement = document.getElementById('quantity');
+    if (quantityElement) {
+        let quantity = parseInt(quantityElement.textContent, 10);
+        if (quantity > 1) {
+            quantityElement.textContent = quantity - 1;
+        }
+    }
+}
+
+// ✅ Event listeners (Handles dynamically added elements)
 document.addEventListener('DOMContentLoaded', () => {
-    // Add to Wishlist
-    document.querySelector('.add-to-wishlist-btn').addEventListener('click', (event) => {
+    // ✅ Add to Wishlist Button
+    document.querySelector('.add-to-wishlist-btn')?.addEventListener('click', (event) => {
         const productId = event.target.dataset.productId;
         addToWishlist(productId);
     });
 
-    // Add to Cart
-    document.querySelector('.add-to-cart-btn').addEventListener('click', (event) => {
+    // ✅ Add to Cart Button
+    document.querySelector('.add-to-cart-btn')?.addEventListener('click', (event) => {
         const productId = event.target.dataset.productId;
-        const quantity = parseInt(document.getElementById('quantity').textContent, 10);
-        addToCart(productId, quantity);
+        const quantityElement = document.getElementById('quantity');
+        const quantity = quantityElement ? parseInt(quantityElement.textContent, 10) : 1;
+
+        // ✅ Get selected size
+        const selectedSizeElement = document.querySelector('.size-option.selected');
+        const size = selectedSizeElement ? selectedSizeElement.getAttribute('data-size') : null;
+
+        addToCart(productId, quantity, size);
+    });
+
+    // ✅ Event delegation for dynamically created size buttons
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('size-option')) {
+            document.querySelectorAll('.size-option').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
     });
 });
-
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -225,6 +295,42 @@ function copyToClipboard(text) {
     document.execCommand('copy');
     document.body.removeChild(textarea);
 }
+
+
+
+// ✅ Load Available Sizes for the Product
+async function loadSizes(productId) {
+    const sizeOptionsContainer = document.getElementById('size-options');
+    
+    if (!sizeOptionsContainer) return;
+
+    sizeOptionsContainer.innerHTML = '<p>Loading sizes...</p>';
+
+    try {
+        const response = await fetch(`/api/product-sizes/${productId}`);
+        const data = await response.json();
+
+        if (data.success && data.sizes.length > 0) {
+            const sizesHtml = data.sizes
+                .map(size => `<button class="size-option" data-size="${size}">${size}</button>`)
+                .join("");
+            sizeOptionsContainer.innerHTML = sizesHtml;
+        } else {
+            sizeOptionsContainer.innerHTML = '<p>No sizes available.</p>';
+        }
+    } catch (error) {
+        console.error("Error fetching sizes:", error);
+        sizeOptionsContainer.innerHTML = '<p>Error loading sizes.</p>';
+    }
+}
+
+// ✅ Load sizes when the page loads
+document.addEventListener('DOMContentLoaded', function () {
+    const productId = document.querySelector('.add-to-cart-btn')?.dataset.productId;
+    if (productId) {
+        loadSizes(productId);
+    }
+});
 
 
 </script>

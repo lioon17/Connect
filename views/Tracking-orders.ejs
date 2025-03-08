@@ -12,6 +12,18 @@
         </a>
     </div>
 
+     <!-- Order Lookup Section -->
+     <div class="t-card t-mb-4">
+        <div class="t-card-header">
+            <h2 class="t-card-title">Track Your Order</h2>
+        </div>
+        <div class="t-card-content">
+            <div class="t-flex t-space-x-2">
+                <input type="text" id="orderNumberInput" class="t-input" placeholder="Enter Order Number">
+                <button id="trackOrderBtn" class="t-btn">Track Order</button>
+            </div>
+        </div>
+    </div>
     <!-- Order Title -->
     <h1>Order #<span id="orderId"></span></h1>
 
@@ -45,8 +57,8 @@
                 <dl class="t-info-grid">
                     <dt>Name:</dt>
                     <dd id="customerName">N/A</dd>
-                    <dt>Email:</dt>
-                    <dd id="customerEmail">N/A</dd>
+                   <!-- <dt>Email:</dt>
+                    <dd id="customerEmail">N/A</dd>-->
                     <dt>Phone:</dt>
                     <dd id="customerPhone">N/A</dd>
                 </dl>
@@ -82,20 +94,19 @@
             <h2 class="t-card-title">Shipping Information</h2>
         </div>
         <div class="t-card-content">
-            <div class="t-flex t-items-center t-space-x-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    <polyline points="3.29 7 12 12 20.71 7"></polyline>
-                    <line x1="12" y1="22" x2="12" y2="12"></line>
-                </svg>
+            <!--<div class="t-flex t-items-center t-space-x-4">
                 <div>
                     <p id="shippingMethod" style="font-weight: 600;">N/A</p>
                     <p id="estimatedDelivery" style="font-size: 0.875rem; color: #6b7280;">N/A</p>
                 </div>
-            </div>
+            </div> -->
             <div style="margin-top: 1rem;">
                 <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Shipping Address:</h4>
-                <p id="shippingAddress">N/A</p>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                    <line x1="12" y1="22" x2="12" y2="12"></line>
+                </svg> <p id="shippingAddress">N/A</p>
             </div>
         </div>
     </div>
@@ -103,32 +114,40 @@
 
 
     <script>
- async function fetchUserOrder() {
+ // Fetch Order Details: Either by session or by inputted order number
+async function fetchUserOrder(orderNumber = null) {
     try {
-        const response = await fetch('/api/tracking');
+        let url = '/api/tracking';
+        if (orderNumber) {
+            url += `?order_id=${orderNumber}`;
+        }
+
+        const response = await fetch(url);
         const data = await response.json();
 
         if (response.ok) {
-            const order = data.order;
-            displayOrderDetails(order);
+            displayOrderDetails(data.order);
         } else {
-            alert(data.message || 'Failed to fetch order details.');
+            alert(data.message || 'Order not found.');
         }
     } catch (error) {
         console.error('Error fetching user order:', error);
         alert('An error occurred while fetching order details.');
     }
 }
+
+// Display Order Details in UI
 function displayOrderDetails(order) {
     document.getElementById('orderId').textContent = order.order_id;
     document.getElementById('orderStatusBadge').textContent = order.order_status;
     document.getElementById('orderStatusBadge').className = `t-status-badge badge-${order.order_status}`;
     document.getElementById('orderDate').textContent = new Date(order.order_date).toLocaleDateString();
-    document.getElementById('orderTotal').textContent = `$${parseFloat(order.total_amount).toFixed(2)}`;
+    document.getElementById('orderTotal').textContent = `Ksh ${parseFloat(order.total_amount).toFixed(2)}`;
     document.getElementById('customerName').textContent = order.customer_name;
     document.getElementById('customerPhone').textContent = order.phone_number || 'N/A';
     document.getElementById('shippingAddress').textContent = order.delivery_address || 'N/A';
 
+    // Format order items
     const items = order.items.split('; ').map(item => {
         const [productInfo, priceInfo, totalInfo] = item.split(', ');
         const product = productInfo.match(/^(.*) \((\d+)\)$/).slice(1);
@@ -137,20 +156,30 @@ function displayOrderDetails(order) {
         return { product: product[0], quantity: parseInt(product[1]), price, total };
     });
 
+    // Populate order items table
     const tbody = document.getElementById('orderItemsBody');
     tbody.innerHTML = items.map(item => `
         <tr>
             <td>${item.product}</td>
             <td>${item.quantity}</td>
-            <td>$${item.price.toFixed(2)}</td>
-            <td>$${item.total.toFixed(2)}</td>
+            <td>Ksh ${item.price.toFixed(2)}</td>
+            <td>Ksh ${item.total.toFixed(2)}</td>
         </tr>
     `).join('');
 }
 
+// Track Order by Order Number (When user enters an order number)
+document.getElementById('trackOrderBtn').addEventListener('click', () => {
+    const orderNumber = document.getElementById('orderNumberInput').value.trim();
+    if (orderNumber) {
+        fetchUserOrder(orderNumber);
+    } else {
+        alert('Please enter an order number.');
+    }
+});
 
-
-document.addEventListener('DOMContentLoaded', fetchUserOrder);
+// Auto-fetch latest order for logged-in user
+document.addEventListener('DOMContentLoaded', () => fetchUserOrder());
 
     </script>
 

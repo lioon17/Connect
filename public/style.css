@@ -1016,6 +1016,27 @@ body {
     font-size: 12px;
     margin-bottom: 10px;
 }
+.category-size {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes the button to the right */
+}
+
+.size-btn {
+    margin-left: auto; /* Moves button to the right */
+    background: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.size-btn:hover {
+    background: #373B44;
+    color: #fff;
+}
+
 
 .stock-status {
     font-size: 14px;
@@ -1913,6 +1934,9 @@ color: #007bff; /* Change text color to white on hover */
         background-color: #078bff;
         
     }
+    .btn-several{
+        margin-top: 10px;
+    }
     .p-button-a{
         display: inline-block;
         padding: 10px 15px;
@@ -2228,7 +2252,7 @@ color: #007bff; /* Change text color to white on hover */
     .c-product-price {
         font-size: 2rem;
         font-weight: 700;
-        color:red;
+        color:rgb(0, 0, 0);
         margin-bottom: 1rem;
     }
     
@@ -2306,6 +2330,22 @@ color: #007bff; /* Change text color to white on hover */
         resize: vertical;
         min-height: 100px;
     }
+    /* Material Text Styling */
+    .c-product-material {
+        font-size: 1.2rem; /* Increase font size for better visibility */
+        font-weight: 500; /* Medium font weight for readability */
+        color: #000000; /* Sand color */
+        background-color: #FAF3E0; /* Light sand background */
+        padding: 8px 12px; /* Padding for spacing */
+        border-radius: 5px; /* Rounded corners */
+        display: inline-block; /* Ensures it doesn’t take full width */
+        margin-top: 10px; /* Adds spacing */
+    }
+
+    .c-product-material strong {
+        color: #A68B5B; /* Slightly darker sand color for contrast */
+    }
+
     
     .full-width {
         grid-column: 1 / -1;
@@ -4182,6 +4222,9 @@ padding: 1rem;
     .t-btn svg {
         margin-right: 0.5rem;
     }
+    .trackOrderBtn:hover {
+        background-color: #6d6c6c;
+    }
     h1 {
         font-size: 1.5rem;
         font-weight: bold;
@@ -4752,4 +4795,168 @@ input:checked + .ca-slider:before {
   .button-51 {
     padding: 16px 32px;
   }
+}
+
+/*popup size*/
+
+.s-content {
+    text-align: center;
+}
+
+.s-h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+}
+
+.s-btn {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.s-btn:hover {
+    background-color: #1d4ed8;
+}
+
+/* Popup styles */
+.s-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.s-popup.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.s-popup-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.s-popup-content {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 28rem;
+    padding: 1.5rem;
+    position: relative;
+    z-index: 51;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.s-popup.visible .s-popup-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.s-popup.closing .s-popup-content {
+    transform: scale(0.95);
+    opacity: 0;
+}
+
+.s-close-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.s-close-btn:hover {
+    color: black;
+}
+
+.s-countdown-container {
+    margin-bottom: 1.5rem;
+}
+
+.s-countdown-bar {
+    height: 0.375rem;
+    background-color: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.s-countdown-progress {
+    height: 100%;
+    background-color: #2563eb;
+    width: 100%;
+    transition: width 1s linear;
+}
+
+.s-countdown-text {
+    font-size: 0.75rem;
+    text-align: right;
+    margin-top: 0.25rem;
+    color: #6b7280;
+}
+
+.s-popup-body {
+    border-left: 4px solid #2563eb;
+    padding-left: 1rem;
+}
+
+.s-popup-body h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.s-popup-body p {
+    color: #4b5563;
+}
+
+.s-popup-footer {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+.size-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.size-option {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.size-option:hover {
+    background-color: #2563eb;
+    color: white;
+}
+
+.size-option.selected {
+    background-color: #2563eb;
+    color: white;
+    border: 2px solid #1d4ed8;
 }

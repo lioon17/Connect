@@ -6,7 +6,7 @@
                 <h2 class="ca-card-title">Account Overview</h2>
                 <p class="ca-card-description">Manage your personal information</p>
                 <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                    <img src="/images/sneakers.png" alt="User's avatar" class="ca-avatar">
+                    <img src="/images/person icon.jpeg" alt="User's avatar" class="ca-avatar">
                     <div style="margin-left: 15px;">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                             <h3 style="margin: 0;">Name:</h3>
@@ -29,7 +29,7 @@
                 <!-- Copy Site Link Section -->
                 <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
                     <h3 style="margin-top: 0; margin-bottom: 10px;">Share Our Site</h3>
-                    <input type="text" id="siteLink" value="https://yourwebsite.com" readonly style="border: 1px solid #ccc; padding: 5px; width: 200px;">
+                    <input type="text" id="siteLink" value="https://connect-6pr5.onrender.com/" readonly style="border: 1px solid #ccc; padding: 5px; width: 200px;">
                     <button id="copyLinkBtn" style="background-color: #284aa7; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 5px;">Copy Link</button>
                 </div>
 
@@ -76,6 +76,7 @@
                 
             
         </div>
+    </div>
     </div>
     <script src="/script.js"></script>
     <script>
@@ -145,7 +146,7 @@ function populateAccountOverview(userDetails) {
             <div class="ca-order-item">
                 <div class="ca-order-row">
                     <p class="ca-order-id">Order #${order.order_id}</p>
-                    <p class="ca-order-total">$${parseFloat(order.total_amount).toFixed(2)}</p>
+                    <p class="ca-order-total">Ksh${parseFloat(order.total_amount).toFixed(2)}</p>
                 </div>
                 <div class="ca-order-row">
                     <p class="ca-order-date">${new Date(order.order_date).toLocaleDateString()}</p>

@@ -63,24 +63,16 @@
                             </button>
                         </div>
         
-                        <!-- Recommended Products Section -->
                         <div class="recommended-products">
                             <h2>You may be interested in ...</h2>
                             <div class="h-product-grid">
-                                <div class="h-product-card">
-                                    <img src="images/IMG-20241221-WA0005.jpg" alt="Flash Spray Wipe Done">
-                                    <h3>Flash Spray Wipe Done</h3>
-                                    <p>$35</p>
-                                    <span class="h-product-category">Supermarket</span>
-                                </div>
-                                <div class="h-product-card">
-                                    <img src="images/IMG-20241221-WA0006.jpg" alt="Ocado Cowboy Steak">
-                                    <h3>Ocado Cowboy Steak</h3>
-                                    <p>$18</p>
-                                    <span class="h-product-category">Supermarket</span>
-                                </div>
+                                <!-- Wishlist items will be dynamically inserted here -->
                             </div>
                         </div>
+                        
+                        
+                        
+                        
                     </div>
                 </div>
             </div>
@@ -234,7 +226,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Product</th>
                                     <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
-                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Price</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Size</th>
                                     <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th>
                                 </tr>
                             </thead>
@@ -268,6 +260,7 @@
     
     </div>
     <script src="/script.js"></script>
+    
     <script>
 document.addEventListener("DOMContentLoaded", () => {
     const steps = document.querySelectorAll(".progress-step");
@@ -506,8 +499,8 @@ async function renderOrderSummary(containerSelector) {
             row.innerHTML = `
                 <td class="px-6 py-4 text-sm text-gray-900">${item.title}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${item.quantity}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">KES ${parseFloat(item.price).toFixed(2)}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">KES ${parseFloat(item.total).toFixed(2)}</td>
+                  <td class="px-6 py-4 text-sm text-gray-900">${item.size}</td>  <!-- ✅ Show size instead of price -->
+                <td class="px-6 py-4 text-sm text-gray-900">KES ${parseFloat(item.total).toFixed(2)}</td> <!-- ✅ Keep total -->
             `;
             itemsContainer.appendChild(row);
         });
@@ -516,6 +509,45 @@ async function renderOrderSummary(containerSelector) {
         container.innerHTML = '<p class="text-red-500">An error occurred while loading order summary.</p>';
     }
 }
+
+// ✅ Function to Fetch Wishlist and Display in "Recommended Products"
+async function loadRecommendedWishlist() {
+    const recommendedContainer = document.querySelector('.h-product-grid');
+
+    if (!recommendedContainer) return; // ✅ Prevent errors if section doesn't exist
+
+    try {
+        const response = await fetch('/api/wishlist');
+        const data = await response.json();
+
+        if (data.success && data.wishlist.length > 0) {
+            recommendedContainer.innerHTML = ''; // Clear existing items
+
+            data.wishlist.forEach(product => {
+                const productCard = `
+                    <div class="h-product-card">
+                        <img src="${product.image_url}" alt="${product.title}">
+                        <h3>${product.title}</h3>
+                        <p>$${product.price}</p>
+                        <span class="h-product-category">${product.category}</span>
+                    </div>
+                `;
+                recommendedContainer.innerHTML += productCard;
+            });
+        } else {
+            recommendedContainer.innerHTML = '<p>No wishlist items found.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading wishlist items:', error);
+        recommendedContainer.innerHTML = '<p>Error loading recommended products.</p>';
+    }
+}
+
+// ✅ Load wishlist items when the page loads
+document.addEventListener('DOMContentLoaded', loadRecommendedWishlist);
+
+
+
     </script>
     <%- include('partials/footer') %>
 

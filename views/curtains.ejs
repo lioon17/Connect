@@ -6,12 +6,12 @@
                 <img src="<%= product.image_url %>" alt="<%= product.title %>">
             </div>
             <div class="c-product-details">
-                <div>
-                    <h1 class="c-product-title"><%= product.title %></h1>
-                    <p class="c-product-price"><%= product.price %> Ksh per meter</p>
-                    <p class="c-product-description"><%= product.description %></p>
-                </div>
-            </div>
+              <h1 class="c-product-title"><%= product.title %></h1>
+              <p class="c-product-price"><%= product.price %> Ksh per meter</p>
+              <p class="c-product-description"><%= product.description %></p>
+             
+          </div>
+          
         </div>
 
         <form class="customization-form">
@@ -40,15 +40,10 @@
 
             <!-- Material and Delivery Section -->
             <div class="c-form-group">
-                <label for="material">Material</label>
-                <select id="material" required>
-                    <option value="">Select material</option>
-                    <option value="cotton">Cotton</option>
-                    <option value="polyester">Polyester</option>
-                    <option value="linen">Linen</option>
-                    <option value="silk">Silk</option>
-                </select>
-            </div>
+              <p class="c-product-material">
+                  <strong>Material:</strong> <%= product.material || 'Not specified' %>
+              </p>
+          </div>          
 
             <div class="c-form-group full-width">
                 <label>Delivery Option</label>
@@ -84,187 +79,165 @@
                 <label for="notes">Additional Notes</label>
                 <textarea id="notes" placeholder="Any special requirements?"></textarea>
             </div>
+            
 
             <div class="full-width">
-                <p id="totalPrice" class="c-total-price">Total Price: <%= product.price %> Ksh</p>
-                <button type="submit" class="c-place-order-btn">Place Order</button>
-            </div>
+              <p id="shippingFeeDisplay" class="c-product-material">Shipping Fee: + Ksh 300</p> <!-- ✅ Added Shipping Fee Display -->
+              <p id="totalPrice" class="c-total-price">Total Price: <%= product.price %> Ksh</p>
+              <button type="submit" class="c-place-order-btn">Place Order</button>
+          </div>
+          
         </form>
     </div>
 </div>
 
  
 <script>
- const pricePerMeter = parseFloat("<%= product.price %>");
-const baseDeliveryFeeNairobi = 300;
-const baseDeliveryFeeOtherCounties = 500;
-const additionalFeePerMeter = 20;
-
-const noDeliveryRadio = document.getElementById('noDelivery');
-const withDeliveryRadio = document.getElementById('withDelivery');
-const deliveryInputs = document.getElementById('deliveryInputs');
-const pickupPoints = document.getElementById('pickupPoints');
-const totalPriceElement = document.getElementById('totalPrice');
-const locationInput = document.getElementById('location');
-const addWindowBtn = document.getElementById('addWindowBtn');
-const windowMeasurements = document.getElementById('windowMeasurements');
-const placeOrderForm = document.querySelector('.customization-form');
-
-// Function to update total price
-function updateTotalPrice() {
-  let totalWidth = 0;
-
-  // Loop through all windows and calculate total width
-  const windows = windowMeasurements.getElementsByClassName('window-measurement');
-  for (let window of windows) {
-    const width = parseFloat(window.querySelector('input[id^="width"]').value) || 1;
-    totalWidth += width;
+const pricePerMeter = parseFloat("<%= product.price %>");
+  const fixedShippingFee = 300; // ✅ Fixed shipping fee
+  
+  const noDeliveryRadio = document.getElementById('noDelivery');
+  const withDeliveryRadio = document.getElementById('withDelivery');
+  const deliveryInputs = document.getElementById('deliveryInputs');
+  const pickupPoints = document.getElementById('pickupPoints');
+  const totalPriceElement = document.getElementById('totalPrice');
+  const locationInput = document.getElementById('location');
+  const addWindowBtn = document.getElementById('addWindowBtn');
+  const windowMeasurements = document.getElementById('windowMeasurements');
+  const placeOrderForm = document.querySelector('.customization-form');
+  
+  // ✅ Function to update total price in real-time
+  function updateTotalPrice() {
+      let totalWidth = 0;
+  
+      // ✅ Loop through all windows and calculate total width dynamically
+      const windows = windowMeasurements.getElementsByClassName('window-measurement');
+      for (let window of windows) {
+          const widthInput = window.querySelector('input[id^="width"]'); // Get width input
+          const width = parseFloat(widthInput.value) || 0; // Convert width to a number or 0 if empty
+          totalWidth += width;
+      }
+  
+      let curtainPrice = totalWidth * pricePerMeter; // ✅ Multiply width with price per meter
+      let totalPrice = curtainPrice + fixedShippingFee; // ✅ Add fixed shipping fee
+  
+      totalPriceElement.textContent = `Total Price: Ksh ${totalPrice.toFixed(2)}`; // ✅ Update UI
   }
-
-  let curtainPrice = pricePerMeter * totalWidth;
-  let totalPrice = curtainPrice;
-
-  // Calculate delivery fee
-  if (withDeliveryRadio.checked) {
-    let deliveryFee = 0;
-    const location = locationInput.value.toLowerCase();
-
-    if (location.includes('nairobi')) {
-      deliveryFee = baseDeliveryFeeNairobi;
-    } else if (location) {
-      deliveryFee = baseDeliveryFeeOtherCounties;
-    }
-
-    if (totalWidth > 20) {
-      const extraMeters = totalWidth - 20;
-      deliveryFee += extraMeters * additionalFeePerMeter;
-    }
-
-    totalPrice += deliveryFee;
-  }
-
-  totalPriceElement.textContent = `Total Price: Ksh ${totalPrice.toFixed(2)}`;
-}
-
-// Add more windows functionality
-addWindowBtn.addEventListener('click', () => {
-  const windowCount = windowMeasurements.children.length + 1;
-  const newWindow = document.createElement('div');
-  newWindow.classList.add('window-measurement');
-  newWindow.innerHTML = `
-    <h4>Window ${windowCount}</h4>
-    <div class="c-form-group">
-      <label for="width${windowCount}">Width (Meters)</label>
-      <input type="number" id="width${windowCount}" placeholder="Enter width" required>
-    </div>
-    <div class="c-form-group">
-      <label for="height${windowCount}">Height (Meters)</label>
-      <input type="number" id="height${windowCount}" placeholder="Enter height" required>
-    </div>
-    <button type="button" class="remove-window-btn">
-      <i class="bi bi-trash"></i> Remove Window
-    </button>
-  `;
-
-  windowMeasurements.appendChild(newWindow);
-
-  const newWidthInput = newWindow.querySelector(`#width${windowCount}`);
-  const newHeightInput = newWindow.querySelector(`#height${windowCount}`);
-  const removeWindowBtn = newWindow.querySelector('.remove-window-btn');
-
-  newWidthInput.addEventListener('input', updateTotalPrice);
-  newHeightInput.addEventListener('input', updateTotalPrice);
-
-  removeWindowBtn.addEventListener('click', () => {
-    windowMeasurements.removeChild(newWindow);
-    updateTotalPrice();
+  
+  // ✅ Add more windows functionality (dynamically updates price)
+  addWindowBtn.addEventListener('click', () => {
+      const windowCount = windowMeasurements.children.length + 1;
+      const newWindow = document.createElement('div');
+      newWindow.classList.add('window-measurement');
+      newWindow.innerHTML = `
+          <h4>Window ${windowCount}</h4>
+          <div class="c-form-group">
+              <label for="width${windowCount}">Width (Meters)</label>
+              <input type="number" id="width${windowCount}" placeholder="Enter width" required>
+          </div>
+          <div class="c-form-group">
+              <label for="height${windowCount}">Height (Meters)</label>
+              <input type="number" id="height${windowCount}" placeholder="Enter height" required>
+          </div>
+          <button type="button" class="remove-window-btn">
+              <i class="bi bi-trash"></i> Remove Window
+          </button>
+      `;
+  
+      windowMeasurements.appendChild(newWindow);
+  
+      const newWidthInput = newWindow.querySelector(`#width${windowCount}`);
+      const newHeightInput = newWindow.querySelector(`#height${windowCount}`);
+      const removeWindowBtn = newWindow.querySelector('.remove-window-btn');
+  
+      // ✅ Update price when user changes width
+      newWidthInput.addEventListener('input', updateTotalPrice);
+      newHeightInput.addEventListener('input', updateTotalPrice);
+  
+      removeWindowBtn.addEventListener('click', () => {
+          windowMeasurements.removeChild(newWindow);
+          updateTotalPrice(); // ✅ Recalculate after removal
+      });
+  
+      updateTotalPrice(); // ✅ Update total price after adding new window
   });
-
-  updateTotalPrice();
-});
-
-// Event listeners for delivery options and location input
-noDeliveryRadio.addEventListener('change', () => {
-  deliveryInputs.style.display = 'none';
-  pickupPoints.style.display = 'block';
-  updateTotalPrice();
-});
-
-withDeliveryRadio.addEventListener('change', () => {
-  deliveryInputs.style.display = 'block';
-  pickupPoints.style.display = 'none';
-  updateTotalPrice();
-});
-
-locationInput.addEventListener('input', updateTotalPrice);
-
-// Submit form data
-placeOrderForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const material = document.getElementById('material').value;
-  const deliveryOption = noDeliveryRadio.checked ? 'no_delivery' : 'delivery';
-  const deliveryLocation = withDeliveryRadio.checked ? locationInput.value : null;
-  const pickupPoint = noDeliveryRadio.checked ? document.getElementById('pickupPoint').value : null;
-  const phoneNumber = document.getElementById('phone').value;
-  const notes = document.getElementById('notes').value;
-  const productId = "<%= product.id %>"; // Replace with the product ID variable
-  const totalPrice = totalPriceElement.textContent.replace('Total Price: Ksh ', '');
-  const windows = [];
-
-  const windowElements = windowMeasurements.getElementsByClassName('window-measurement');
-  Array.from(windowElements).forEach((window, index) => {
-    const width = parseFloat(window.querySelector(`input[id^="width"]`).value) || 0;
-    const height = parseFloat(window.querySelector(`input[id^="height"]`).value) || 0;
-
-    windows.push({
-      window_number: index + 1,
-      width,
-      height,
-    });
+  
+  // ✅ Update price when user interacts with the form
+  document.addEventListener('input', (event) => {
+      if (event.target.matches('input[id^="width"]') || event.target.matches('input[id^="height"]')) {
+          updateTotalPrice(); // ✅ Update price when width or height changes
+      }
   });
-
-  try {
-    // Post order details
-    const orderResponse = await fetch('/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        product_id: productId,
-        material,
-        delivery_option: deliveryOption,
-        delivery_location: deliveryLocation,
-        pickup_point: pickupPoint,
-        phone_number: phoneNumber,
-        total_price: totalPrice,
-        notes,
-      }),
-    });
-
-    if (!orderResponse.ok) {
-      throw new Error('Failed to place order');
-    }
-
-    const orderData = await orderResponse.json();
-    const orderId = orderData.order_id;
-
-    // Post window details
-    await fetch(`/orders/${orderId}/windows`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ windows }),
-    });
-
-          // Redirect to the Curtains Order Summary page with the order_id
-  alert('Order placed successfully!');
-  window.location.href = `/curtains-ordersummary?order_id=${orderId}`;
-  } catch (err) {
-    console.error('Error placing order:', err);
-    alert('Failed to place order. Please try again.');
-  }
-});
-
-updateTotalPrice();
+  
+  // ✅ Submit form data
+  placeOrderForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+  
+      const material = "<%= product.material %>"; // ✅ Get material directly from the product object
+      const deliveryOption = noDeliveryRadio.checked ? 'no_delivery' : 'delivery';
+      const deliveryLocation = withDeliveryRadio.checked ? locationInput.value : null;
+      const pickupPoint = noDeliveryRadio.checked ? document.getElementById('pickupPoint').value : null;
+      const phoneNumber = document.getElementById('phone').value;
+      const notes = document.getElementById('notes').value;
+      const productId = "<%= product.id %>"; // ✅ Product ID
+      const totalPrice = totalPriceElement.textContent.replace('Total Price: Ksh ', '');
+      const windows = [];
+  
+      // ✅ Collect window measurements dynamically
+      const windowElements = windowMeasurements.getElementsByClassName('window-measurement');
+      Array.from(windowElements).forEach((window, index) => {
+          const width = parseFloat(window.querySelector(`input[id^="width"]`).value) || 0;
+          const height = parseFloat(window.querySelector(`input[id^="height"]`).value) || 0;
+  
+          windows.push({
+              window_number: index + 1,
+              width,
+              height,
+          });
+      });
+  
+      try {
+          // ✅ Post order details
+          const orderResponse = await fetch('/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  product_id: productId,
+                  material,
+                  delivery_option: deliveryOption,
+                  delivery_location: deliveryLocation,
+                  pickup_point: pickupPoint,
+                  phone_number: phoneNumber,
+                  total_price: totalPrice,
+                  notes,
+              }),
+          });
+  
+          if (!orderResponse.ok) {
+              throw new Error('Failed to place order');
+          }
+  
+          const orderData = await orderResponse.json();
+          const orderId = orderData.order_id;
+  
+          // ✅ Post window details
+          await fetch(`/orders/${orderId}/windows`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ windows }),
+          });
+  
+          // ✅ Redirect to the Curtains Order Summary page with the order_id
+          alert('Order placed successfully!');
+          window.location.href = `/curtains-ordersummary?order_id=${orderId}`;
+      } catch (err) {
+          console.error('Error placing order:', err);
+          alert('Failed to place order. Please try again.');
+      }
+  });
+  
+  updateTotalPrice(); // ✅ Initial calculation on page load
+  
 
 </script>
 <%- include('partials/footer') %>

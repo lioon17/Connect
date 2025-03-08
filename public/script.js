@@ -168,14 +168,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const clearCartBtn = document.getElementById('clearCart');
         
         let cart = [];
-
-        
-        async function addToCart(productId) {
+     
+        // ✅ Updated `addToCart` function to accept size
+        async function addToCart(productId, size) {
             try {
                 const response = await fetch('/cart', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_id: productId, quantity: 1 })
+                    body: JSON.stringify({ product_id: productId, quantity: 1, size })
                 });
         
                 if (response.status === 401) {
@@ -662,6 +662,7 @@ async function loadProducts() {
                     ? product.stock_status.replace('_', ' ')
                     : 'Unknown';
 
+
                 const productActions = product.category.toLowerCase() === 'curtains'
                     ? `
                         <button class="place-order-btn" onclick="redirectToCurtainsPage(${product.id})">
@@ -671,7 +672,7 @@ async function loadProducts() {
                     : `
                         <button class="add-to-cart" 
                             ${stockStatus === 'out-of-stock' ? 'disabled' : ''} 
-                            onclick="addToCart(${product.id})">
+                            data-product-id="${product.id}">
                             <i class="bi bi-cart-plus"></i> Add to cart
                         </button>
                     `;
@@ -688,12 +689,18 @@ async function loadProducts() {
                                 <i class="bi bi-eye"></i> Quick View
                             </span>
                         </div>
-                        <div class="product-info">
-                            <h2 class="product-title">${product.title}</h2>
-                            <span class="product-category">${product.category}</span>
-                            <div class="stock-status ${stockStatus}">
-                                <i class="bi ${stockStatus === 'in-stock' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'}"></i> ${stockStatusText}
-                            </div>
+                       <div class="product-info">
+                                <h2 class="product-title">${product.title}</h2>
+                                <div class="category-size">
+                                    <span class="product-category">${product.category}</span>
+                                      <button class="product-category size-btn" data-product-id="${product.id}">
+                                      <i class="bi bi-tag"></i>Size
+                                      </button>
+                                </div>
+                                <div class="stock-status ${stockStatus}">
+                                    <i class="bi ${stockStatus === 'in-stock' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'}"></i> 
+                                    ${stockStatusText}
+                               </div>
                         </div>
                         <div class="product-actions">
                             <button class="action-button add-to-wishlist" data-product-id="${product.id}">
@@ -731,11 +738,95 @@ function redirectToCurtainsPage(productId) {
 document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
 });
-    
-   
+
+document.addEventListener('DOMContentLoaded', function () {
+    const popup = document.getElementById('popup');
+    const popupBody = document.getElementById('size-options'); // Where sizes are loaded
+    const selectedSizeDisplay = document.getElementById('selected-size-display'); // Show selected size
+    const closeBtn = document.querySelector('.s-close-btn'); // Ensure we select the correct button
+    const overlay = document.querySelector('.s-popup-overlay');
+    let selectedSize = null; // Store selected size
+
+    function showPopup(productId) {
+        selectedSize = null; // Reset selected size when opening popup
+        selectedSizeDisplay.innerHTML = "No size selected"; // Reset displayed size
+        popupBody.innerHTML = '<p>Loading sizes...</p>';
+        
+        // Display popup instantly before fetching data
+        popup.style.display = 'flex'; // Ensure popup is visible
+        popup.classList.add('visible'); // Add visible class for animation
+
+        fetch(`/api/product-sizes/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.sizes.length > 0) {
+                    // Generate size buttons
+                    const sizesHtml = data.sizes
+                        .map(size => `<button class="size-option" data-size="${size}">${size}</button>`)
+                        .join("");
+                    popupBody.innerHTML = `<p>Select your size:</p><div class="size-options">${sizesHtml}</div>`;
+                } else {
+                    popupBody.innerHTML = `<p>No sizes available.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching sizes:", error);
+                popupBody.innerHTML = `<p>Error loading sizes.</p>`;
+            });
+    }
+
+    function hidePopup() {
+        popup.classList.remove('visible'); // Remove visibility
+        setTimeout(() => {
+            popup.style.display = 'none'; // Fully hide after animation
+        }, 200); // Adjust timing based on CSS animation speed
+    }
+
+    // ✅ Use event delegation for dynamically generated size options
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('size-option')) {
+            document.querySelectorAll('.size-option').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            selectedSize = event.target.getAttribute('data-size'); // Store selected size
+            selectedSizeDisplay.innerHTML = `Selected Size: ${selectedSize}`; // Show selected size
+        }
+    });
+
+    // ✅ Ensure Add to Cart includes the selected size
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('add-to-cart')) {
+            const productId = event.target.getAttribute('data-product-id');
+
+            if (!selectedSize) {
+                alert("Please select a size before adding to cart.");
+                return;
+            }
+
+            addToCart(productId, selectedSize);
+            hidePopup(); // Close popup after adding to cart
+        }
+    });
+
+    // ✅ Open the size popup
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('size-btn')) {
+            const productId = event.target.getAttribute('data-product-id');
+            showPopup(productId);
+        }
+    });
+
+    // ✅ Close popup when clicking close button or overlay
+    document.addEventListener('click', function (event) {
+        if (event.target.closest('.s-close-btn')) { // Fix: Use closest to detect clicks inside the button
+            hidePopup();
+        }
+        if (event.target.classList.contains('s-popup-overlay')) {
+            hidePopup();
+        }
+    });
+});
 
 
-       
    /*search*/ 
     document.getElementById('search').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
@@ -978,5 +1069,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-
- 

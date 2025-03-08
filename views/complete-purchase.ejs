@@ -51,8 +51,8 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Window</th>
                                     <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Dimensions</th>
-                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Price per m²</th>
-                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th>
+                                     <!-- <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Price per m²</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th> --> 
                                 </tr>
                             </thead>
                             <tbody id="order-items" class="divide-y divide-gray-200">
@@ -133,8 +133,7 @@
                     <tr>
                         <td class="px-6 py-4 text-sm text-gray-900">Window ${window.window_number}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">${window.width}m x ${window.height}m</td>
-                        <td class="px-6 py-4 text-sm text-gray-500">KES 20</td>
-                        <td class="px-6 py-4 text-sm text-gray-900">KES ${(window.width * window.height * 20).toFixed(2)}</td>
+                       
                     </tr>
                 `).join('');
             }

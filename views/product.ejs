@@ -110,9 +110,9 @@
                 <p id="modal-description"></p>
                 <p id="modal-price" class="modal-price"></p>
                 <span id="modal-stock" class="stock-badge"></span>
-                <button id="modal-add-to-cart" class="add-to-cart">
+              <!--  <button id="modal-add-to-cart" class="add-to-cart">
                     <i class="bi bi-cart-plus"></i> Add to cart
-                </button>
+                </button> -->
             </div>
         </div>
 
@@ -134,6 +134,30 @@
                     <i id="popupIcon" class="bi bi-cart3"></i>
                     <span id="popupMessage"></span>
                 </div>
+            </div>
+        </div>
+        <div id="popup" class="s-popup">
+            <div class="s-popup-overlay"></div>
+            <div class="s-popup-content">
+                <!-- Ensure the close button is a clickable div -->
+                <div class="s-close-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </div>
+        
+                <div class="s-popup-body">
+                    <h2>Select Size</h2>
+                    <p id="selected-size-display">No size selected</p> <!-- Show selected size here -->
+                    <div id="size-options" class="size-options">
+                        <!-- Sizes will be dynamically loaded here -->
+                    </div>
+                </div>
+        
+            <!--<div class="s-popup-footer">
+                    <button id="gotItBtn" class="btn">Close</button>
+                </div> -->
             </div>
         </div>
         

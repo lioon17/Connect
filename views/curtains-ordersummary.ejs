@@ -44,10 +44,10 @@
                     <span>Subtotal</span>
                     <span id="subtotal" class="font-semibold"></span>
                 </div>
-                <div class="flex justify-between text-sm">
+              <!--<div class="flex justify-between text-sm">
                     <span>Shipping</span>
                     <span id="shipping" class="font-semibold"></span>
-                </div>
+                </div>-->
             </div>
             <hr class="my-6">
             <div class="flex justify-between text-lg font-bold">
@@ -93,10 +93,11 @@
             </p>
         </div>
     </div>
-    <script  >document.addEventListener('DOMContentLoaded', async () => {
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
         const orderItemsEl = document.getElementById('order-items');
         const subtotalEl = document.getElementById('subtotal');
-        const shippingEl = document.getElementById('shipping');
+       // const shippingEl = document.getElementById('shipping');
         const totalEl = document.getElementById('total');
         const mpesaInputEl = document.getElementById('mpesa-input');
         const placeOrderBtn = document.getElementById('place-order-btn');
@@ -145,13 +146,13 @@
         }
     
         // Function to update totals
-        function updateTotals(order, shippingCost = 0) {
+        function updateTotals(order/*, shippingCost = 0*/) {
             const subtotal = parseFloat(order.total_price);
-            const total = subtotal + shippingCost;
+            const total = subtotal/* + shippingCost */;
     
-            subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
-            shippingEl.textContent = `$${shippingCost.toFixed(2)}`;
-            totalEl.textContent = `$${total.toFixed(2)}`;
+            subtotalEl.textContent = `${subtotal.toFixed(2)}`;
+          //  shippingEl.textContent = `${shippingCost.toFixed(2)}`;
+            totalEl.textContent = `Ksh ${total.toFixed(2)}`;
         }
     
         // Function to handle payment method changes
@@ -179,80 +180,94 @@
                 radio.addEventListener('change', handlePaymentMethodChange);
             });
     
-            // Handle place order button click
-            placeOrderBtn.addEventListener('click', async () => {
-                const selectedPayment = document.querySelector('input[name="payment"]:checked')?.value;
-                const mpesaNumber = document.getElementById('mpesa-phone').value.trim();
-    
-                // Validate payment method
-                if (!selectedPayment) {
-                    alert('Please select a payment method.');
-                    return;
-                }
-    
-                // Validate Mpesa number for Mpesa payment method
-                if (selectedPayment === 'mpesa' && (!mpesaNumber || !/^[0-9]{10}$/.test(mpesaNumber))) {
-                    alert('Please enter a valid Mpesa number.');
-                    return;
-                }
-    
-                try {
-                    // Step 1: Register Callback URL
-                    const registerResponse = await fetch('/registerurl');
-                    if (!registerResponse.ok) {
-                        console.error('Error registering callback URL:', await registerResponse.text());
-                        alert('Failed to register callback URL.');
-                        return;
-                    }
-    
-                    // Step 2: Trigger STK Push if Mpesa is selected
-                    if (selectedPayment === 'mpesa') {
-                        const totalAmount = parseFloat(totalEl.textContent.replace('$', ''));
-                        const adjustedAmount = adjustAmount(totalAmount); // Adjust the amount for Mpesa
-    
-                        const stkResponse = await fetch('/stkpush', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                phoneNumber: mpesaNumber,
-                                amount: adjustedAmount, // Use adjusted amount
-                                orderId: orderDetails.order_id, // Include order ID for tracking
-                            }),
-                        });
-    
-                        if (!stkResponse.ok) {
-                            console.error('Error triggering STK Push:', await stkResponse.text());
-                            alert('Failed to send STK push.');
-                            return;
-                        }
-    
-                        const stkResult = await stkResponse.json();
-                        const { CheckoutRequestID } = stkResult.response;
-                        console.log('STK Push sent successfully. CheckoutRequestID:', CheckoutRequestID);
-    
-                        // Step 3: Update the Order with the CheckoutRequestID
-                        const updateOrderResponse = await fetch(`/orders/${orderDetails.order_id}/update-checkout-id`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ CheckoutRequestID }),
-                        });
-    
-                        if (!updateOrderResponse.ok) {
-                            const updateError = await updateOrderResponse.json();
-                            console.error('Error updating order:', updateError);
-                            alert(`Failed to update order: ${updateError.message}`);
-                            return;
-                        }
-    
-                        window.location.href = `/complete-purchase?order_id=${orderDetails.order_id}`;
-                    } else {
-                        alert('Order will be processed with cash on delivery.');
-                    }
-                } catch (error) {
-                    console.error('Error during payment process:', error);
-                    alert('An error occurred during the payment process. Please try again.');
-                }
+           // Handle place order button click
+placeOrderBtn.addEventListener('click', async () => {
+    const selectedPayment = document.querySelector('input[name="payment"]:checked')?.value;
+    const mpesaNumber = document.getElementById('mpesa-phone').value.trim();
+
+    // Validate payment method selection
+    if (!selectedPayment) {
+        alert('Please select a payment method.');
+        return;
+    }
+
+    // Validate Mpesa number format
+    if (selectedPayment === 'mpesa') {
+        if (!mpesaNumber || !/^(2547\d{8}|07\d{8})$/.test(mpesaNumber)) {
+            alert('Please enter a valid Mpesa number (e.g., 07XXXXXXXX or 2547XXXXXXXX).');
+            return;
+        }
+    }
+
+    try {
+        // Step 1: Register Callback URL
+        const registerResponse = await fetch('/registerurl');
+        if (!registerResponse.ok) {
+            console.error('Error registering callback URL:', await registerResponse.text());
+            alert('Failed to register callback URL.');
+            return;
+        }
+
+        // Step 2: Process Mpesa Payment
+        if (selectedPayment === 'mpesa') {
+            // ✅ Ensure the amount is correctly retrieved
+            const totalAmountText = totalEl.textContent.replace('Ksh ', '').trim();
+            const totalAmount = parseFloat(totalAmountText);
+
+            if (isNaN(totalAmount) || totalAmount <= 0) {
+                alert('Invalid amount for payment.');
+                return;
+            }
+
+            const adjustedAmount = adjustAmount(totalAmount); // Ensure proper rounding
+
+            // ✅ Send STK Push Request
+            const stkResponse = await fetch('/stkpush', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phoneNumber: mpesaNumber,
+                    amount: adjustedAmount,
+                    orderId: orderDetails.order_id, // Ensure order ID is included
+                }),
             });
+
+            if (!stkResponse.ok) {
+                const stkError = await stkResponse.json();
+                console.error('Error triggering STK Push:', stkError);
+                alert(`Failed to send STK push: ${stkError.message}`);
+                return;
+            }
+
+            const stkResult = await stkResponse.json();
+            const { CheckoutRequestID } = stkResult.response;
+            console.log('STK Push sent successfully. CheckoutRequestID:', CheckoutRequestID);
+
+            // Step 3: Update the Order with CheckoutRequestID
+            const updateOrderResponse = await fetch(`/orders/${orderDetails.order_id}/update-checkout-id`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ CheckoutRequestID }),
+            });
+
+            if (!updateOrderResponse.ok) {
+                const updateError = await updateOrderResponse.json();
+                console.error('Error updating order:', updateError);
+                alert(`Failed to update order: ${updateError.message}`);
+                return;
+            }
+
+            // Redirect after successful payment request
+            window.location.href = `/complete-purchase?order_id=${orderDetails.order_id}`;
+        } else {
+            alert('Order will be processed with cash on delivery.');
+        }
+    } catch (error) {
+        console.error('Error during payment process:', error);
+        alert('An error occurred during the payment process. Please try again.');
+    }
+});
+
     
             // Initialize the payment method display
             handlePaymentMethodChange();
